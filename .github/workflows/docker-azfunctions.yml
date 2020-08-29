@@ -11,7 +11,7 @@ jobs:
   build:
     env:
       NOME_IMAGEM: contagem-aznapratica
-      NOME_FUNCTIONAPP: groffe-exemplofinal
+      NOME_FUNCTIONAPP: groffefunc-docker
       IMAGEM_AZURE: ${{ secrets.AZURE_CONTAINER_REGISTRY_SERVER }}/$NOME_IMAGEM
 
     runs-on: ubuntu-latest
@@ -32,3 +32,14 @@ jobs:
         docker build . --file Dockerfile --tag ${{ env.IMAGEM_AZURE }}:latest
         docker tag ${{ env.IMAGEM_AZURE }}:latest ${{ env.IMAGEM_AZURE }}:$GITHUB_RUN_NUMBER
         docker push ${{ env.IMAGEM_AZURE }}
+        
+    - name: Azure Login - Conectando com Credenciais no Azure
+      uses: Azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Azure Functions Container Action
+      uses: Azure/functions-container-action@v1.0.1
+      with:
+        app-name: ${{ env.NOME_FUNCTIONAPP }}
+        image: groffegithubactions.azurecr.io/contagem-aznapratica:latest
